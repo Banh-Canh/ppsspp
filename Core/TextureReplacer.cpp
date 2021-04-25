@@ -85,6 +85,7 @@ bool TextureReplacer::LoadIni() {
 	reduceHashGlobalValue = 0.5;
 	// Prevents dumping the mipmaps.
 	ignoreMipmap_ = false;
+	sortByDimension_ = false;
 
 	if (File::Exists(basePath_ + INI_FILENAME)) {
 		IniFile ini;
@@ -134,6 +135,7 @@ bool TextureReplacer::LoadIniValues(IniFile &ini, bool isOverride) {
 	// Multiplies sizeInRAM/bytesPerLine in XXHASH by 0.5.
 	options->Get("reduceHash", &reduceHash_, reduceHash_);
 	options->Get("ignoreMipmap", &ignoreMipmap_, ignoreMipmap_);
+	options->Get("sortByDimension", &sortByDimension_, sortByDimension_);
 	if (reduceHash_ && hash_ == ReplacedTextureHash::QUICK) {
 		reduceHash_ = false;
 		ERROR_LOG(G3D, "Texture Replacement: reduceHash option requires safer hash, use xxh32 or xxh64 instead.");
@@ -474,7 +476,12 @@ void TextureReplacer::NotifyTextureDecoded(const ReplacedTextureDecodeInfo &repl
 
 	std::string hashfile = LookupHashFile(cachekey, replacedInfo.hash, level);
 	const std::string filename = basePath_ + hashfile;
-	const std::string saveFilename = basePath_ + NEW_TEXTURE_DIR + hashfile;
+	if ((sortByDimension_) && (!File::Exists(basePath_ + NEW_TEXTURE_DIR + std::to_string(w) + "_" + std::to_string(h) + "/"))) {
+		File::CreateFullPath(basePath_ + NEW_TEXTURE_DIR + std::to_string(w) + "_" + std::to_string(h) + "/");
+		File::CreateEmptyFile(basePath_ + NEW_TEXTURE_DIR + std::to_string(w) + "_" + std::to_string(h) + "/.nomedia");
+	}
+
+	const std::string saveFilename(sortByDimension_ ? basePath_ + NEW_TEXTURE_DIR + std::to_string(w) + "_" + std::to_string(h) + "/" + hashfile : basePath_ + NEW_TEXTURE_DIR + hashfile);
 
 	// If it's empty, it's an ignored hash, we intentionally don't save.
 	if (hashfile.empty() || File::Exists(filename)) {

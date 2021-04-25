@@ -210,6 +210,7 @@ protected:
 	float reduceHashSize = 1.0; // default value with reduceHash to false
 	float reduceHashGlobalValue = 0.5; // Global value for textures dump pngs of all sizes, 0.5 by default but can be set in textures.ini
 	bool ignoreMipmap_ = false;
+	bool sortByDimension_ = false;
 	std::string gameID_;
 	std::string basePath_;
 	ReplacedTextureHash hash_ = ReplacedTextureHash::QUICK;
